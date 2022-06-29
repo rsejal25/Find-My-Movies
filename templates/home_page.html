@@ -1,0 +1,386 @@
+<!DOCTYPE html>   
+<html>   
+<head>  
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+ <link rel="stylesheet" href=
+"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<title> Home Page </title>  
+<style> 
+* {
+       font-family: 'Brush Script MT', cursive;
+    }  
+Body {   
+  background-color: white;  
+}  
+button {   
+width:200px;
+height:30px;
+background-color:#ff008c;
+border:1px solid #ff008c;
+border-radius:17px;
+color:purple;
+font-size:16px;
+font-weight:300;  
+}   
+.login{
+width:383px;
+overflow:hidden;
+margin:20 0 0 450px;
+padding:40px;
+box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+border-radius:15px;
+font-size:28px;
+color:purple;
+background:white;
+}
+ .search{
+float:right;
+margin:7px;
+}
+.search button{
+background-color:#0074D9;
+color:#f2f2f2;
+float:right;
+width:60px;
+padding:5px 10px;
+margin-right:16px;
+font-size:12px;
+border:none;
+}
+#movie{
+border-radius:5px;
+width:160px;
+}
+#playListName{
+border-radius:5px;
+}
+.header {
+  overflow: hidden;
+  background-color: #ff008c;
+  padding: 20px 10px;
+}
+
+.header a {
+  float: left;
+  color: purple;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px; 
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.header a.logo {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.header a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.header a.active {
+  background-color: #ff008c;
+  color: white;
+}
+
+.header-right {
+  float: right;
+}
+
+@media screen and (max-width: 500px) {
+  .header a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+  
+  .header-right {
+    float: none;
+  }
+}
+</style>   
+
+<script>
+window.addEventListener('load',async function(){
+let response=await fetch('/signup/get_all_playlist');
+let result=await response.json();
+let token=localStorage.getItem('unique_token');
+let user_id=0;
+if(token!=undefined)
+{
+//alert('login first');
+//document.getElementById('login').submit();
+var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+jsonPayload=JSON.parse(jsonPayload);
+user_id=jsonPayload['user_id']
+
+
+//return;
+}
+
+
+let table=document.getElementById('playlistTable');
+let tbody=document.createElement('tbody');
+tbody.style.overflow="scroll";
+for(let i=0;i<result.length;i++)
+{
+let tr=document.createElement('tr');
+let td=document.createElement('td');
+td=document.createElement('td');
+td.appendChild(document.createTextNode(i+1))
+tr.appendChild(td);
+let a=document.createElement('a');
+a.href='/signup/get_list_page/'+result[i].play_list_id+'/'+user_id;
+a.style.color="#ff008c";
+//a.onclick=function(ev){ev.preventDefault();getMoviesForPlayList(result[i].play_list_id)};
+a.innerHTML=result[i].play_list_name;
+td=document.createElement('td');
+td.appendChild(a);
+tr.appendChild(td);
+tbody.appendChild(tr);
+}
+table.appendChild(tbody);
+//table.setAttribute('border','2');
+})
+
+
+let movies=new Map();
+let is_playlist_created=false;
+let selectedMovies=[];
+async function searchMovie(){
+//document.getElementById('movieTable').innerHTML="";
+let apiKey="354c9e7";
+let movieName=document.getElementById('movie').value.trim();
+let url='http://www.omdbapi.com/?apikey='+apiKey+"&t="+movieName;
+let response=await fetch(url,{
+method:'GET'
+});
+let result=await response.json();
+alert(result)
+getMovieDetails(result);
+}
+
+
+
+function getMovieDetails(response)
+{
+document.getElementById('movieList').style.display="";
+if(response.Response=="False")
+{
+document.getElementById('movieList').style.color="red";
+document.getElementById('movieList').innerHTML=response.Error;
+return;
+}
+document.getElementById('movieList').style.display="";
+document.getElementById('movieList').style.color="purple";
+movies.set(response.imdbID,response);
+let mainDiv=document.getElementById('movieList');
+mainDiv.innerHTML="";
+let img=document.createElement('img');
+img.src=response.Poster;
+img.style.width="200px";
+img.style.height="200px";
+//img.style.float="left";
+img.style.padding="10px";
+let div=document.createElement('div');
+//div.style.float="right";
+let h1=document.createElement('h1');
+h1.innerHTML=response.Title;
+mainDiv.appendChild(img);
+mainDiv.appendChild(h1);
+h3=document.createElement('h3');
+h3.innerHTML=response.Released;
+mainDiv.appendChild(h3);
+let button=document.createElement('button');
+button.addEventListener('click',function(){
+addMovies(response);
+})
+button.innerHTML='add to playlist';
+mainDiv.appendChild(button);
+//mainDiv.appendChild(div);
+
+
+
+}
+
+async function addMovies(movieInfo){
+let token=localStorage.getItem('unique_token');
+if(token==undefined)
+{
+alert('login first');
+return;
+}
+var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+jsonPayload=JSON.parse(jsonPayload);
+alert(jsonPayload['user_id']);
+if(is_playlist_created==false)
+{
+alert('create playlist first');
+return;
+}
+let playListName=document.getElementById('playListName').value.trim();
+
+let movieJson={
+"title":movieInfo.Title,
+"release_year":movieInfo.Year,
+"omdbId":movieInfo.imdbID
+}
+selectedMovies.push(movieJson);
+alert('yes');
+//movies.append();
+
+
+
+if(selectedMovies.length==0)
+{
+alert('please select the movies for the playlist')
+return;
+}
+let obj={
+"moviesList":selectedMovies,
+"playlist_name":playListName,
+"user_id":jsonPayload['user_id']
+}
+//let token=localStorage.getItem('unique_token');
+let response=await fetch('/signup/add_movies',{
+method:"POST",
+headers:{
+"Content-type":"application/json",
+"Authorization":"JWT "+token
+},
+body:JSON.stringify(obj)
+})
+if(response.status==401 || response.status==403)
+{
+alert('login first');
+document.getElementById('login').submit();
+
+return;
+}
+let result=await response.json();
+//alert(result);
+}
+
+async function createPlayList(){
+let playListName=document.getElementById('playListName').value.trim();
+let token=localStorage.getItem('unique_token');
+if(token==undefined)
+{
+alert('login first');
+return;
+}
+var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+jsonPayload=JSON.parse(jsonPayload);
+alert(jsonPayload['user_id']);
+let playlist_json={
+"user_id":jsonPayload['user_id'],
+"playlist_name":playListName,
+"is_public":document.getElementById('is_public').checked
+};
+//alert(JSON.stringify(response));
+let result= await fetch('/signup/create_playlist',{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"JWT "+token
+},
+body:JSON.stringify(playlist_json)
+});
+if(result.status==401 || result.status==403)
+{
+alert('login first');
+document.getElementById('login').submit();
+
+return;
+}
+let obj=await result.json();
+//alert(obj); 
+is_playlist_created=true;
+document.getElementById('addButton').disabled=false;
+}
+function logoutUser(){
+localStorage.removeItem('unique_token');
+alert('logged out')
+}
+</script>
+
+</head>    
+<body>    
+<div class="header">
+  <a href="#default" class="logo">MoviesInfo</a>
+  <div class="header-right">
+    <a class="active" href="/signup/home_page">Home</a>
+    <a href="/signup/loginForm">Login</a>
+    <a href="#" onclick="logoutUser()">Logout</a>
+  </div>
+</div>
+    <center> <h1 style="color:purple">Search Movies At Your Finger Tips</h1>   
+        <div class="login">   
+<input type='text' id='movie' placeholder="Search Movies" name="search" >
+<button type='button' onClick='searchMovie()'><i class="fa fa-search" style="font-size:18px;"></i></button>
+        </div>   
+       
+<br>
+    <center> <h1 style="color:purple">Create Playlist</h1>   
+        <div class="login">   
+<table>
+<tbody>
+<tr>
+<td><label>Playlist Name</label></td>
+<td><input type='text' id='playListName' placeholder="PlayList Name" name="search" ><br></td>
+</tr>
+<tr>
+<td><label>Public</label></td>
+<td><input type='checkbox' id='is_public' placeholder="Is public"  ><br></td>
+</tr>
+<tr>
+<td><button type='button' onClick='createPlayList()'>Create Playlist</button></td>
+</tr>
+<tbody>
+</table>
+        </div>   
+
+</center>
+<br>
+<br>
+    
+<center>
+<div id='movieList' class='login' style="display:none">
+<h1 style="text-align:center">Movie Details</h1>
+</div>
+</center>
+<br><br>
+ <center> <h1 style="color:purple">Popular Playlists</h1>  
+<center>
+<div class='login' style="height:200px;overflow:scroll">
+<div id='playlistSection' >
+<table id='playlistTable' style="width:100%">
+<thead>
+<th style="width:20%;height:50px">S.No</th>
+<th style="height:50px">Playlist Name</th>
+</thead>
+
+</table>
+</div>
+</div>
+
+
+</center>
+<form action='/signup/loginForm' id='login' hidden></form>
+</body>     
+</html>  

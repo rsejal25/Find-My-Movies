@@ -1,0 +1,144 @@
+<!DOCTYPE html>   
+<html>   
+<head>  
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+<title> Login Page </title>  
+
+<script>
+window.addEventListener('load',async function(){
+let playlistid="{{info.playlistid}}"
+let user_id="{{info.user_id}}"
+playlistid=parseInt(playlistid)
+user_id=parseInt(user_id)
+let response=await fetch('/signup/get_all_movies_for_playlist/'+playlistid+'/'+user_id);
+alert(response.status)
+if(response.status==403)
+{
+alert('he')
+let div=document.getElementById('error');
+div.innerHTML="you do not have access for this playlist";
+div.style.color='red';
+return;
+}
+let result=await response.json();
+let table=document.getElementById('listTable');
+let tbody=document.createElement('tbody');
+for(let i=0;i<result.length;i++)
+{
+let tr=document.createElement('tr');
+let td=document.createElement('td');
+td=document.createElement('td');
+td.appendChild(document.createTextNode(i+1))
+tr.appendChild(td);
+td=document.createElement('td');
+td.appendChild(document.createTextNode(result[i].movie_name));
+tr.appendChild(td);
+td=document.createElement('td');
+td.appendChild(document.createTextNode(result[i].release_year));
+tr.appendChild(td);
+
+tbody.appendChild(tr);
+}
+table.appendChild(tbody);
+table.setAttribute('border','2');
+});
+</script>
+<style>  
+* {
+      font-family: sans-serif;
+    } 
+Body {  
+  font-family: Calibri, Helvetica, sans-serif;  
+  background-color: white;  
+color:purple;
+}  
+.header {
+  overflow: hidden;
+  background-color: #ff008c;
+  padding: 20px 10px;
+}
+
+.header a {
+  float: left;
+  color: purple;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px; 
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.header a.logo {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.header a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.header a.active {
+  background-color: #ff008c;
+  color: white;
+}
+
+.header-right {
+  float: right;
+}
+
+@media screen and (max-width: 500px) {
+  .header a {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+  
+  .header-right {
+    float: none;
+  }
+}
+.login{
+width:383px;
+overflow:hidden;
+margin:20 0 0 450px;
+padding:40px;
+box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+border-radius:15px;
+font-size:28px;
+color:purple;
+background:white;
+}   
+</style>   
+</head>    
+<body>    
+<div class="header">
+  <a href="#default" class="logo">MoviesInfo</a>
+  <div class="header-right">
+    <a  href="/signup/home_page">Home</a>
+    <a href="/signup/loginForm">Login</a>
+    <a href="#about">Logout</a>
+  </div>
+</div>
+    <center> <h1>  Movies in the Playlist </h1> </center>   
+     
+
+<div id='error'></div>
+<center>
+<div class="login">   
+
+<table id='listTable'>
+<thead>
+<tr>
+<td>S No.</td>
+<td>Name</td>
+<td>Release Year</td>
+</tr>
+</thead>
+</table>   
+</center>
+        </div>   
+       
+</body>     
+</html>  
