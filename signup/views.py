@@ -88,10 +88,13 @@ def add_movies(request):
     play_list=Play_List.objects.filter(user_id=logging_user,play_list_name=playlist_name).first()
     if play_list is not None:
      for movie in movies_list:
+       year=movie['release_year']
+       if year.isnumeric()==False:
+         year=0
        movie_omdbID=movie['omdbId']
        movie_entry=Movies.objects.filter(movie_omdbId=movie_omdbID).first()
        if movie_entry is None:
-        movie_entry=Movies.objects.create(movie_name=movie['title'],release_year=int(movie['release_year']),movie_omdbId=movie['omdbId'])
+        movie_entry=Movies.objects.create(movie_name=movie['title'],release_year=year,movie_omdbId=movie['omdbId'])
        movie_playlist_entry=PlayList_Movie.objects.filter(playList=play_list,movie=movie_entry).first()
        if movie_playlist_entry is None:
         movie_playList_entry=PlayList_Movie.objects.create(playList=play_list,movie=movie_entry)
@@ -132,10 +135,18 @@ def get_all_movies_for_playlist(request,playlistid,user_id):
  
 
 def get_list_page(request,playlistid,user_id):
- info={'playlistid':playlistid,'user_id':user_id}
+ playlist=Play_List.objects.get(play_list_id=playlistid)
+ info={'playlistid':playlistid,'user_id':user_id,'playlist_name':playlist.play_list_name}
  context={'info':info}
  return render(request,'listPage.html',context)
 
  
-    
- 
+def get_playlists_for_user(request,user_id):
+ user=User.objects.filter(id=user_id)[0]
+ if user:
+  logging_user=Logging_User.objects.get(username=user.username)
+  if logging_user:
+   playlists=Play_List.objects.filter(user_id=logging_user)
+   serializer=PlayListSerializer(playlists,many=True)
+   return JsonResponse(serializer.data,safe=False)  
+  return JsonResponse({'success':False})

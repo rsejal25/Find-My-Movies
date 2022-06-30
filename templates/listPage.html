@@ -2,7 +2,7 @@
 <html>   
 <head>  
 <meta name="viewport" content="width=device-width, initial-scale=1">  
-<title> Login Page </title>  
+<title> List Page </title>  
 
 <script>
 window.addEventListener('load',async function(){
@@ -11,53 +11,128 @@ let user_id="{{info.user_id}}"
 playlistid=parseInt(playlistid)
 user_id=parseInt(user_id)
 let response=await fetch('/signup/get_all_movies_for_playlist/'+playlistid+'/'+user_id);
-alert(response.status)
+//alert(response.status)
 if(response.status==403)
 {
-alert('he')
+//alert('he')
 let div=document.getElementById('error');
 document.querySelector('.login').style.display="none";
 div.innerHTML="you do not have access for this playlist";
-div.style.color='red';
+div.style.color='red'; 
 return;
 }
 let result=await response.json();
-let table=document.getElementById('listTable');
+//let table=document.getElementById('listTable');
 let tbody=document.createElement('tbody');
 if(result.length==0)
 {
-document.querySelector('.login').innerHTML="No movies are added";
-document.getElementById('listTable').style.display="none";
+document.getElementById('mainDiv').innerHTML="No movies are added";
+//document.getElementById('listTable').style.display="none";
 return;
 }
+let movie_info;
+let movieBox=document.getElementById('mainDiv');
 for(let i=0;i<result.length;i++)
 {
-let tr=document.createElement('tr');
-let td=document.createElement('td');
-td=document.createElement('td');
-td.appendChild(document.createTextNode(i+1))
-tr.appendChild(td);
-td=document.createElement('td');
-td.appendChild(document.createTextNode(result[i].movie_name));
-tr.appendChild(td);
-td=document.createElement('td');
-td.appendChild(document.createTextNode(result[i].release_year));
-tr.appendChild(td);
+let apiKey="354c9e7";
+let url='https://www.omdbapi.com/?apikey='+apiKey+"&t="+result[i].movie_name;
+let response=await fetch(url,{
+method:'GET'
+});
+let movie_info=await response.json();
+//movie_info=searchMovies(result[i].movie_name);
+//alert(movie_info);
+let mainDiv=document.createElement('div');
+mainDiv.classList.add("movieDiv");
+let img=document.createElement('img');
+img.src=movie_info.Poster;
+img.classList.add("movieImg");
+mainDiv.appendChild(img);
+let h3=document.createElement('h3');
+h3.innerHTML=result[i].movie_name;
+mainDiv.appendChild(h3);
+let p=document.createElement('p');
+p.innerHTML=movie_info.Actors;
+mainDiv.appendChild(p);
+p=document.createElement('p');
+p.innerHTML=movie_info.Released;
+mainDiv.appendChild(p);
+movieBox.appendChild(mainDiv);
 
-tbody.appendChild(tr);
 }
-table.appendChild(tbody);
-table.setAttribute('border','2');
 });
 function logoutUser(){
 localStorage.removeItem('unique_token');
 alert('logged out')
 }
+
+
+async function searchMovies(movieName){
+//document.getElementById('movieTable').innerHTML="";
+let apiKey="354c9e7";
+let url='https://www.omdbapi.com/?apikey='+apiKey+"&t="+movieName;
+let response=await fetch(url,{
+method:'GET'
+});
+let result=await response.json();
+//alert(result)
+return result;
+//getMovieDetails(result);
+}
+
+
+
+function getMovieDetails(response)
+{
+document.getElementById('movieList').style.display="";
+if(response.Response=="False")
+{
+document.getElementById('movieList').style.color="red";
+document.getElementById('movieList').innerHTML=response.Error;
+return;
+}
+document.getElementById('movieList').style.display="";
+document.getElementById('movieList').style.color="purple";
+let mainDiv=document.getElementById('movieList');
+mainDiv.innerHTML="";
+let img=document.createElement('img');
+img.src=response.Poster;
+img.style.width="200px";
+img.style.height="200px";
+//img.style.float="left";
+img.style.padding="10px";
+let div=document.createElement('div');
+//div.style.float="right";
+let h1=document.createElement('h1');
+h1.innerHTML=response.Title;
+mainDiv.appendChild(img);
+mainDiv.appendChild(h1);
+p=document.createElement('p');
+let d="Released :"+response.Released;
+p.innerHTML=d;
+mainDiv.appendChild(p);
+p=document.createElement('p');
+p.innerHTML="Actors"+response.Actors;
+mainDiv.appendChild(p);
+let button=document.createElement('button');
+button.addEventListener('click',function(){
+addMovies(response);
+})
+button.innerHTML='add to playlist';
+mainDiv.appendChild(button);
+//mainDiv.appendChild(div);
+
+
+
+}
+
+
+
 </script>
 <style>  
 * {
-       font-family: 'Brush Script MT', cursive;
-    }  
+font-family: 'Brush Script MT', cursive;
+}  
 Body {  
   font-family: Calibri, Helvetica, sans-serif;  
   background-color: white;  
@@ -120,12 +195,25 @@ border-radius:15px;
 font-size:28px;
 color:purple;
 background:white;
-}   
+} 
+.movieDiv{
+width:550px;
+height:180px;
+border:2px solid black;
+overflow:hidden;
+border-radius:15px;
+}  
+.movieImg{
+width:180px;
+height:180/px;
+float:left;
+border-radius:8px;
+}
 </style>   
 </head>    
 <body>    
 <div class="header">
-  <a href="#default" class="logo">MoviesInfo</a>
+  <a href="#default" class="logo">Movies-Buzz</a>
   <div class="header-right">
     <a  href="/signup/home_page">Home</a>
     <a href="/signup/registerForm">Register</a>
@@ -133,25 +221,27 @@ background:white;
     <a href="#" onClick="logoutUser()">Logout</a>
   </div>
 </div>
-    <center> <h1>  Movies in the Playlist </h1> </center>   
+    <center> <h1>  Movies in the <span style="color: #ff008c">{{info.playlist_name}} </span>Playlist </h1> </center>   
      
 <center>
 <div id='error'></div>
 </center>
 <center>
-<div class="login">   
+<div  id='mainDiv' >
 
-<table id='listTable'>
-<thead>
-<tr>
-<td>S No.</td>
-<td>Name</td>
-<td>Release Year</td>
-</tr>
-</thead>
-</table>   
+
+
+</div>   
+
+</center>       
+
+<br>
+<br>
+<center>
+<div id='movieList' class='login' style="display:none">
+<h1 style="text-align:center">Movie Details</h1>
+</div>
 </center>
-        </div>   
-       
+
 </body>     
 </html>  

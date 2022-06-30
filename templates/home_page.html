@@ -120,7 +120,16 @@ var base64Url = token.split('.')[1];
     }).join(''));
 jsonPayload=JSON.parse(jsonPayload);
 user_id=jsonPayload['user_id']
-
+let list=await fetch('/signup/get_playlist_for_user/'+user_id);
+let oldPlaylists=await list.json();
+let select=document.getElementById('choosePlaylists');
+for(let i=0;i<oldPlaylists.length;i++)
+{
+let option=document.createElement('option');
+option.innerHTML=oldPlaylists[i].play_list_name;
+option.value=oldPlaylists[i].play_list_name;
+select.appendChild(option);
+}
 
 //return;
 }
@@ -154,6 +163,8 @@ table.appendChild(tbody);
 let movies=new Map();
 let is_playlist_created=false;
 let selectedMovies=[];
+let movieInfo=null;
+
 async function searchMovie(){
 //document.getElementById('movieTable').innerHTML="";
 let apiKey="354c9e7";
@@ -164,6 +175,7 @@ method:'GET'
 });
 let result=await response.json();
 //alert(result)
+movieInfo=result;
 getMovieDetails(result);
 }
 
@@ -185,8 +197,9 @@ let mainDiv=document.getElementById('movieList');
 mainDiv.innerHTML="";
 let img=document.createElement('img');
 img.src=response.Poster;
-img.style.width="200px";
-img.style.height="200px";
+img.style.width="180px";
+img.style.height="180px";
+//img.style.border-radius="8px";
 //img.style.float="left";
 img.style.padding="10px";
 let div=document.createElement('div');
@@ -195,26 +208,53 @@ let h1=document.createElement('h1');
 h1.innerHTML=response.Title;
 mainDiv.appendChild(img);
 mainDiv.appendChild(h1);
-h3=document.createElement('h3');
-h3.innerHTML=response.Released;
-mainDiv.appendChild(h3);
+p=document.createElement('p');
+p.innerHTML=response.Released;
+mainDiv.appendChild(p);
+p=document.createElement('p');
+p.innerHTML=response.Actors;
+mainDiv.appendChild(p);
 let button=document.createElement('button');
 button.addEventListener('click',function(){
-addMovies(response);
+showNewPlaylistPanel();
+//addMovies(response);
 })
-button.innerHTML='add to playlist';
+button.innerHTML='add to New playlist';
 mainDiv.appendChild(button);
-//mainDiv.appendChild(div);
+button=document.createElement('button');
+button.addEventListener('click',function(){
+showOldPlayListPanel();
+})
+button.innerHTML='add to Old playlist';
+mainDiv.appendChild(button);
 
+//mainDiv.appendChild(div);
 
 
 }
 
-async function addMovies(movieInfo){
+function showOldPlayListPanel(){
+document.getElementById('playlistSection').style.display="none";
+
+document.getElementById('oldPlaylist').style.display="";
+
+}
+
+function showNewPlaylistPanel(){
+document.getElementById('oldPlaylist').style.display="none";
+
+document.getElementById('playlistSection').style.display="";
+
+}
+
+
+async function addMovies(playListName){
+
 let token=localStorage.getItem('unique_token');
 if(token==undefined)
 {
 alert('login first');
+document.getElementById('login').submit();
 return;
 }
 var base64Url = token.split('.')[1];
@@ -226,10 +266,10 @@ jsonPayload=JSON.parse(jsonPayload);
 //alert(jsonPayload['user_id']);
 if(is_playlist_created==false)
 {
-alert('create playlist first');
-return;
+//alert('create playlist first');
+//return;
 }
-let playListName=document.getElementById('playListName').value.trim();
+//let playListName=document.getElementById('playListName').value.trim();
 
 let movieJson={
 "title":movieInfo.Title,
@@ -244,7 +284,7 @@ selectedMovies.push(movieJson);
 
 if(selectedMovies.length==0)
 {
-alert('please select the movies for the playlist')
+//alert('please select the movies for the playlist')
 return;
 }
 let obj={
@@ -269,6 +309,16 @@ document.getElementById('login').submit();
 return;
 }
 let result=await response.json();
+if(result.success==true)
+{
+//alert('movies added')
+}
+
+//let f=document.getElementById('movieList');
+//f.appendChild(document.getElementById('playlistSection'));
+//alert('jej');
+//alert(document.getElementById('playlistSection'));
+//document.getElementById('playlistSection').style.display="";
 //alert(result);
 }
 
@@ -311,18 +361,26 @@ return;
 let obj=await result.json();
 //alert(obj); 
 is_playlist_created=true;
-document.getElementById('addButton').disabled=false;
+//alert('Playlist Created')
+addMovies(playListName);
 }
 function logoutUser(){
 localStorage.removeItem('unique_token');
 alert('logged out')
+}
+
+function addMoviesToOldPlaylist()
+{
+let p=document.getElementById('choosePlaylists');
+//alert(typeof p.options[p.selectedIndex].value)
+addMovies(p.options[p.selectedIndex].value);
 }
 </script>
 
 </head>    
 <body>    
 <div class="header">
-  <a href="#default" class="logo">MoviesInfo</a>
+  <a href="#default" class="logo">Movies-Buzz</a>
   <div class="header-right">
     <a class="active" href="/signup/home_page">Home</a>
     <a href="/signup/loginForm">Login</a>
@@ -338,8 +396,17 @@ alert('logged out')
         </div>   
        
 <br>
-    <center> <h1 style="color:purple">Create Playlist</h1>   
-        <div class="login">   
+<br>
+</center>    
+<center>
+<div id='movieList' class='login' style="display:none">
+<h1 style="text-align:center">Movie Details</h1>
+</div>
+</center>
+
+<br>
+<center>
+        <div class="login" id='playlistSection' style="display:none">   
 <table>
 <tbody>
 <tr>
@@ -351,25 +418,32 @@ alert('logged out')
 <td><input type='checkbox' id='is_public' placeholder="Is public"  ><br></td>
 </tr>
 <tr>
-<td><button type='button' onClick='createPlayList()'>Create Playlist</button></td>
+<td><button type='button' onClick='createPlayList()'>Create Playlist & Add</button></td>
 </tr>
 <tbody>
 </table>
         </div>   
 
 </center>
-<br>
-<br>
-    
+
 <center>
-<div id='movieList' class='login' style="display:none">
-<h1 style="text-align:center">Movie Details</h1>
+<div class='login' id='oldPlaylist' style="display:none">
+<table>
+<tr>
+<td>Choose Playlists</td>
+<td><select id='choosePlaylists' ></td>
+</select>
+</tr>
+<tr>
+<td><button type='button' onClick='addMoviesToOldPlaylist()'>Add</button></td>
+</tr>
+</table>
 </div>
 </center>
 <br><br>
- <center> <h1 style="color:purple">Popular Playlists</h1>  
+ <center> <h1 style="color:purple">Popular Playlists</h1>  </center>
 <center>
-<div class='login' style="height:200px;overflow:scroll">
+<div class='login' style="height:200px;overflow:auto">
 <div id='playlistSection' >
 <table id='playlistTable' style="width:100%">
 <thead>
@@ -383,6 +457,10 @@ alert('logged out')
 
 
 </center>
+
+
 <form action='/signup/loginForm' id='login' hidden></form>
+
+</div>
 </body>     
 </html>  

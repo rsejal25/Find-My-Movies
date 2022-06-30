@@ -11,6 +11,7 @@ path('create_playlist',views.create_playlist),
 path('add_movies',views.add_movies),
 path('get_all_playlist',views.get_all_playlists),
 path('get_all_movies_for_playlist/<int:playlistid>/<int:user_id>',views.get_all_movies_for_playlist),
-path('get_list_page/<int:playlistid>/<int:user_id>',views.get_list_page)
+path('get_list_page/<int:playlistid>/<int:user_id>',views.get_list_page),
+path('get_playlist_for_user/<int:user_id>',views.get_playlists_for_user)
 
 ]
