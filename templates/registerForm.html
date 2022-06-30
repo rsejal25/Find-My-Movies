@@ -22,19 +22,19 @@ headers:{
 },
 body:JSON.stringify(json)
 };
-alert('button clicked')
+//alert('button clicked')
 const response= await fetch('/signup/register',options);
 if(!response.ok || response.status!=200)
 {
-alert('some error');
+//alert('some error');
 }
 if(response.ok)
 {
 let result=await response.json();
-alert(result)
+//alert(result)
 if(result.status=='success')
 {
-alert(result.access)
+//alert(result.access)
 localStorage.setItem('unique_token',result.access);
 
 }
@@ -145,6 +145,7 @@ border-radius:5px;
   <div class="header-right">
     <a class="active" href="/signup/home_page">Home</a>
     <a href="/signup/loginForm">Login</a>
+    <a href="/signup/registerForm">Register</a>
     <a href="#about" disabled="disabled">Logout</a>
   </div>
 </div>

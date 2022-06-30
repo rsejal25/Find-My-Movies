@@ -16,6 +16,7 @@ if(response.status==403)
 {
 alert('he')
 let div=document.getElementById('error');
+document.querySelector('.login').style.display="none";
 div.innerHTML="you do not have access for this playlist";
 div.style.color='red';
 return;
@@ -23,6 +24,12 @@ return;
 let result=await response.json();
 let table=document.getElementById('listTable');
 let tbody=document.createElement('tbody');
+if(result.length==0)
+{
+document.querySelector('.login').innerHTML="No movies are added";
+document.getElementById('listTable').style.display="none";
+return;
+}
 for(let i=0;i<result.length;i++)
 {
 let tr=document.createElement('tr');
@@ -42,6 +49,10 @@ tbody.appendChild(tr);
 table.appendChild(tbody);
 table.setAttribute('border','2');
 });
+function logoutUser(){
+localStorage.removeItem('unique_token');
+alert('logged out')
+}
 </script>
 <style>  
 * {
@@ -117,14 +128,16 @@ background:white;
   <a href="#default" class="logo">MoviesInfo</a>
   <div class="header-right">
     <a  href="/signup/home_page">Home</a>
+    <a href="/signup/registerForm">Register</a>
     <a href="/signup/loginForm">Login</a>
-    <a href="#about">Logout</a>
+    <a href="#" onClick="logoutUser()">Logout</a>
   </div>
 </div>
     <center> <h1>  Movies in the Playlist </h1> </center>   
      
-
+<center>
 <div id='error'></div>
+</center>
 <center>
 <div class="login">   
 

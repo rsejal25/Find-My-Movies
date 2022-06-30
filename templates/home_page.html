@@ -158,12 +158,12 @@ async function searchMovie(){
 //document.getElementById('movieTable').innerHTML="";
 let apiKey="354c9e7";
 let movieName=document.getElementById('movie').value.trim();
-let url='http://www.omdbapi.com/?apikey='+apiKey+"&t="+movieName;
+let url='https://www.omdbapi.com/?apikey='+apiKey+"&t="+movieName;
 let response=await fetch(url,{
 method:'GET'
 });
 let result=await response.json();
-alert(result)
+//alert(result)
 getMovieDetails(result);
 }
 
@@ -223,7 +223,7 @@ var base64Url = token.split('.')[1];
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 jsonPayload=JSON.parse(jsonPayload);
-alert(jsonPayload['user_id']);
+//alert(jsonPayload['user_id']);
 if(is_playlist_created==false)
 {
 alert('create playlist first');
@@ -237,7 +237,7 @@ let movieJson={
 "omdbId":movieInfo.imdbID
 }
 selectedMovies.push(movieJson);
-alert('yes');
+//alert('yes');
 //movies.append();
 
 
@@ -286,7 +286,7 @@ var base64Url = token.split('.')[1];
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 jsonPayload=JSON.parse(jsonPayload);
-alert(jsonPayload['user_id']);
+//alert(jsonPayload['user_id']);
 let playlist_json={
 "user_id":jsonPayload['user_id'],
 "playlist_name":playListName,
@@ -326,6 +326,8 @@ alert('logged out')
   <div class="header-right">
     <a class="active" href="/signup/home_page">Home</a>
     <a href="/signup/loginForm">Login</a>
+    <a href="/signup/registerForm">Register</a>
+
     <a href="#" onclick="logoutUser()">Logout</a>
   </div>
 </div>

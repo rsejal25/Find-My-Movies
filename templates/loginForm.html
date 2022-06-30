@@ -108,19 +108,19 @@ headers:{
 },
 body:JSON.stringify(json)
 };
-alert('button clicked')
+//alert('button clicked')
 const response= await fetch('/signup/login',options);
 if(!response.ok || response.status!=200)
 {
-alert('some error');
+//alert('some error');
 }
 if(response.ok)
 {
 let result=await response.json();
-alert(result)
+//alert(result)
 if(result.status=='success')
 {
-alert(result.access)
+//alert(result.access)
 localStorage.setItem('unique_token',result.access);
 document.getElementById('home_page').submit();
 }
@@ -140,7 +140,8 @@ document.getElementById('error').innerHTML=result.message;
   <div class="header-right">
     <a class="active" href="/signup/home_page">Home</a>
     <a href="/signup/loginForm">Login</a>
-    <a href="#about" disable>Logout</a>
+    <a href="/signup/registerForm">Register</a>
+    <a href="#" disable>Logout</a>
   </div>
 </div>
     <center> <h1 class='heading'>  Sign In </h1> 
