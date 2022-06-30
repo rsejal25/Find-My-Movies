@@ -8,6 +8,7 @@
 <style> 
 * {
        font-family: 'Brush Script MT', cursive;
+font-size:30px;
     }  
 Body {   
   background-color: white;  
@@ -104,7 +105,13 @@ border-radius:5px;
 </style>   
 
 <script>
-window.addEventListener('load',async function(){
+window.addEventListener('load',function(){
+updateTables()
+})
+
+
+
+async function updateTables(){
 let response=await fetch('/signup/get_all_playlist');
 let result=await response.json();
 let token=localStorage.getItem('unique_token');
@@ -157,7 +164,14 @@ tbody.appendChild(tr);
 }
 table.appendChild(tbody);
 //table.setAttribute('border','2');
-})
+}
+
+
+
+
+
+
+
 
 
 let movies=new Map();
@@ -363,6 +377,7 @@ let obj=await result.json();
 is_playlist_created=true;
 //alert('Playlist Created')
 addMovies(playListName);
+updateTables();
 }
 function logoutUser(){
 localStorage.removeItem('unique_token');
@@ -443,7 +458,7 @@ addMovies(p.options[p.selectedIndex].value);
 <br><br>
  <center> <h1 style="color:purple">Popular Playlists</h1>  </center>
 <center>
-<div class='login' style="height:200px;overflow:auto">
+<div class='login' style="height:200px;overflow:auto" id='popularFiles'>
 <div id='playlistSection' >
 <table id='playlistTable' style="width:100%">
 <thead>
